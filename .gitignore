@@ -1,0 +1,7 @@
+.env
+google_credentials.json
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+rapport_*.html
+*.log
