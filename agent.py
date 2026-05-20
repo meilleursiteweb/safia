@@ -13,14 +13,14 @@ from typing import Optional
 # ──────────────────────────────────────────────
 # CONFIG — variables d'environnement (.env)
 # ──────────────────────────────────────────────
-OPENROUTER_API_KEY    = os.getenv("OPENROUTER_API_KEY", "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")
+OPENROUTER_API_KEY    = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_MODEL      = os.getenv("OPENROUTER_MODEL", "google/gemini-2.0-flash-001")
-SCRAPER_API_KEY       = os.getenv("SCRAPER_API_KEY", "0c03590d921423882cdb44c6892c95b1")
-SHEETS_ID             = os.getenv("SHEETS_ID", "16cg8GYbA3nbDHFyAJH91h-XijunD6wV8U27jFXGKzno")
-GMAIL_USER            = os.getenv("GMAIL_USER", "sawadogoissa.bf@gmail.com")
+SCRAPER_API_KEY       = os.getenv("SCRAPER_API_KEY", "")
+SHEETS_ID             = os.getenv("SHEETS_ID", "")
+GMAIL_USER            = os.getenv("GMAIL_USER", "")
 GMAIL_PASSWORD        = os.getenv("GMAIL_PASSWORD", "")
 GOOGLE_CREDS_FILE     = os.getenv("GOOGLE_CREDS_FILE", "google_credentials.json")
-RAPPORT_DESTINATAIRE  = os.getenv("RAPPORT_DESTINATAIRE", "safae.elotmani@gmail.com")
+RAPPORT_DESTINATAIRE  = os.getenv("RAPPORT_DESTINATAIRE", "")
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_HEADERS = {
