@@ -1179,6 +1179,50 @@ def verifier_analyse_due() -> tuple[bool, str]:
 
 
 # ──────────────────────────────────────────────
+# GESTION MOT DE PASSE — persistance cloud via Sheets
+# ──────────────────────────────────────────────
+def lire_password_config() -> Optional[str]:
+    """Lit le mot de passe depuis l'onglet 'config' du Google Sheet.
+    Retourne None si absent (fallback sur la variable d'environnement)."""
+    try:
+        gc = get_sheets_client()
+        sh = gc.open_by_key(SHEETS_ID)
+        try:
+            ws = sh.worksheet("config")
+        except Exception:
+            return None
+        for row in ws.get_all_records():
+            if row.get("cle") == "DASHBOARD_PASSWORD":
+                v = str(row.get("valeur", "")).strip()
+                return v if v else None
+        return None
+    except Exception:
+        return None
+
+def ecrire_password_config(new_pass: str) -> bool:
+    """Écrit le nouveau mot de passe dans l'onglet 'config' du Google Sheet.
+    Crée l'onglet automatiquement s'il n'existe pas encore."""
+    try:
+        gc = get_sheets_client()
+        sh = gc.open_by_key(SHEETS_ID)
+        try:
+            ws = sh.worksheet("config")
+        except Exception:
+            ws = sh.add_worksheet(title="config", rows=20, cols=3)
+            ws.append_row(["cle", "valeur", "description"])
+        rows = ws.get_all_records()
+        for i, row in enumerate(rows, start=2):
+            if row.get("cle") == "DASHBOARD_PASSWORD":
+                ws.update_cell(i, 2, new_pass)
+                return True
+        ws.append_row(["DASHBOARD_PASSWORD", new_pass, "Mot de passe du dashboard"])
+        return True
+    except Exception as e:
+        print(f"[SHEETS] Erreur écriture password: {e}")
+        return False
+
+
+# ──────────────────────────────────────────────
 # PIPELINE PRINCIPAL
 # ──────────────────────────────────────────────
 def run_analyse_complete(destinataire: str = None) -> dict:

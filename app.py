@@ -79,7 +79,7 @@ from agent import (
     suggerer_sujets_blog, generer_brief_seo, generer_article_complet,
     generer_calendrier_contenu, analyser_mon_site,
     lire_tous_concurrents, ajouter_concurrent, desactiver_concurrent, reactiver_concurrent,
-    verifier_analyse_due,
+    verifier_analyse_due, lire_password_config, ecrire_password_config,
     SAFIA_CONTEXT,
 )
 
@@ -92,11 +92,23 @@ st.set_page_config(
 )
 
 # ── Credentials ───────────────────────────────────────────────────────────────
-DASH_USER = os.getenv("DASHBOARD_USER", "safia")
-DASH_PASS = os.getenv("DASHBOARD_PASSWORD", "safia2026")
+DASH_USER      = os.getenv("DASHBOARD_USER", "safia")
+_dash_pass_env = os.getenv("DASHBOARD_PASSWORD", "safia2026")
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+
+# Charge le mot de passe depuis Google Sheets une fois par session.
+# Sur Streamlit Cloud il n'y a pas de .env — Sheets est la source de vérité.
+# En local, fallback sur le .env si l'onglet 'config' n'existe pas encore.
+if "dash_pass" not in st.session_state:
+    try:
+        _pass_sheets = lire_password_config()
+        st.session_state.dash_pass = _pass_sheets if _pass_sheets else _dash_pass_env
+    except Exception:
+        st.session_state.dash_pass = _dash_pass_env
+
+DASH_PASS = st.session_state.dash_pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -679,11 +691,16 @@ with st.sidebar:
                 elif new_pwd != new_pwd2:
                     st.error("Les mots de passe ne correspondent pas.")
                 else:
-                    if _update_env_password(new_pwd):
+                    # Sauvegarde dans Google Sheets (fonctionne local + cloud)
+                    ok_sheets = ecrire_password_config(new_pwd)
+                    # Sauvegarde dans .env si disponible (local uniquement)
+                    _update_env_password(new_pwd)
+                    if ok_sheets:
+                        st.session_state.dash_pass = new_pwd  # effet immédiat
                         st.success("Mot de passe mis à jour !")
                         st.rerun()
                     else:
-                        st.error("Erreur lors de la mise à jour.")
+                        st.error("Impossible d'écrire dans Google Sheets.")
 
     if st.button("Se déconnecter", use_container_width=True, key="logout_btn"):
         st.session_state.authenticated = False
